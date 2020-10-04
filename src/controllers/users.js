@@ -6,8 +6,16 @@ const users = {
     register: async (req, res) => {
         try {
             const body = req.body
-            console.log(body)
-            usersModel.register(body)
+
+            const salt = await bcrypt.genSalt(10)
+            const hashword = await bcrypt.hash(body.password, salt)
+
+            const data = {
+                name : body.name,
+                email : body.email,
+                password : hashword
+            }
+            usersModel.register(data)
             .then((result) => {
                 success(res, result, 'You are registered')
             })

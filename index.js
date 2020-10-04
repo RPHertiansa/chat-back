@@ -20,6 +20,17 @@ app.use('/api/v1/users', usersRouter)
 
 io.on('connection', (socket) => {
     console.log('user connected')
+
+    socket.on('sendMessage', (payload) => {
+        io.emit('receiveMessage', `${payload.username} : ${payload.message}`)
+    })
+
+    socket.on('notification', (username) => {
+        socket.broadcast.emit(('get-notified'), `${username} has joined the conversation`)
+    })
+    socket.on('disconnect', () => {
+        console.log('user disconnected')
+    })
 })
 
 
