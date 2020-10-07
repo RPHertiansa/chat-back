@@ -44,14 +44,29 @@ io.on('connection', (socket) => {
         socket.join(payload.user)
     })
 
-    socket.on('sendMessage', (payload) => {
-        const message = `${payload.sender} : ${payload.message}`
-        io.to(payload.receiver).emit('chatList', message)
-    })
-
-    
-
-    
+    socket.on('send-message', (payload) => {
+        const room = payload.room
+        messageModel.insert({
+          sender: payload.username,
+          receiver: room,
+          message: payload.textChat
+        }).then(() => {
+          io.to(room).emit('private-message', {
+            sender: payload.username,
+            msg: payload.chatList,
+            receiver: room
+          })
+        }).catch(err => {
+          console.log(err)
+        })
+      })
+      socket.on('get-history-message', (payload) => {
+        messageModel.get(payload).then(result => {
+          io.to(payload.sender).emit('history-message', result)
+        }).catch(err => {
+          console.log(err)
+        })
+      })
 
     socket.on('notification', (username) => {
         socket.broadcast.emit(('get-notified'), `${username} has joined the conversation`)

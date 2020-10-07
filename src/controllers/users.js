@@ -148,7 +148,6 @@ const users = {
                                         const data = {
                                             iduser: userData.iduser,
                                             username: userData.username,
-                                            level: userData.level,
                                             token: token,
                                             refreshtoken: userRefreshToken
                                         }
@@ -180,8 +179,7 @@ const users = {
                 const newToken = jwt.sign(
                     {
                         email: user.email,
-                        username: user.username,
-                        level: user.level
+                        username: user.username
                     },
                     JWT_KEY,
                     {expiresIn: 3600}
