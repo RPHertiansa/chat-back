@@ -41,10 +41,9 @@ io.on('connection', (socket) => {
     })
 
     socket.on('join-room', (payload) => {
-        socket.join(payload.user)
-    })
-
-    socket.on('send-message', (payload) => {
+        socket.join(payload)
+      })
+      socket.on('send-message', (payload) => {
         const room = payload.room
         messageModel.insert({
           sender: payload.username,
@@ -53,7 +52,7 @@ io.on('connection', (socket) => {
         }).then(() => {
           io.to(room).emit('private-message', {
             sender: payload.username,
-            msg: payload.chatList,
+            msg: payload.textChat,
             receiver: room
           })
         }).catch(err => {
@@ -67,13 +66,6 @@ io.on('connection', (socket) => {
           console.log(err)
         })
       })
-
-    socket.on('notification', (username) => {
-        socket.broadcast.emit(('get-notified'), `${username} has joined the conversation`)
-    })
-    socket.on('disconnect', () => {
-        console.log('user disconnected')
-    })
 })
 
 
