@@ -4,6 +4,8 @@ const bodyParser = require('body-parser')
 const http  = require('http')
 const socketio = require('socket.io')
 const { PORT } = require('./src/helpers/env')
+const userController = require('./src/controllers/users')
+const userModel = require('./src/models/users')
 
 const app = express()
 const server = http.createServer(app)
@@ -22,7 +24,22 @@ io.on('connection', (socket) => {
     console.log('user connected')
 
     socket.on('sendMessage', (payload) => {
-        io.emit('receiveMessage', `${payload.username} : ${payload.message}`)
+        const message = `${payload.sender} : ${payload.message}`
+        io.to(payload.receiver).emit('chatList', message)
+    })
+
+    socket.on('join-room', (payload) => {
+        socket.join(payload.user)
+    })
+
+    socket.on('get-all-users',()=> {
+        userModel.getAll()
+        .then((result) => {
+            io.emit('userList',result)
+        })
+        .catch((err) => {
+            console.log(err)
+        })
     })
 
     socket.on('notification', (username) => {

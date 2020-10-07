@@ -14,7 +14,51 @@ const users = {
     },
     login: (data) => {
         return new Promise((resolve, reject) => {
-            db.query(`SELECT * FROM users WHERE email = ${data.email}`, (err, result) => {
+            db.query(`SELECT * FROM users WHERE username = ? `,data.username, (err, result) => {
+                if(err) {
+                    reject(new Error(err))
+                } else {
+                    resolve(result)
+                }
+            })
+        })
+    },
+    logout: (iduser) => {
+        return new Promise((resolve, reject) => {
+            db.query(`UPDATE users SET refreshtoken = null WHERE iduser = '${iduser}'`, (err, result) => {
+                if (err) {
+                    reject (new Error(err))
+                } else {
+                    resolve(result)
+                }
+            })
+        })
+    },
+    getAll: () => {
+        return new Promise ((resolve, reject) => {
+            db.query(`SELECT * FROM users`, (err, result) => {
+                if(err) {
+                    reject(new Error(err))
+                } else {
+                    resolve(result)
+                }
+            })
+        })
+    },
+    getDetail: (iduser) => {
+        return new Promise((resolve, reject) => {
+            db.query(`SELECT * FROM users WHERE iduser = '${iduser}'`, (err, result) => {
+                if(err) {
+                    reject(new Error(err))
+                } else {
+                    resolve(result)
+                }
+            })
+        })
+    },
+    delete: (iduser) => {
+        return new Promise((resolve, reject) => {
+            db.query(`DELETE FROM users WHERE iduser = '${iduser}'`, (err, result) => {
                 if(err) {
                     reject(new Error(err))
                 } else {
