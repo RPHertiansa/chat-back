@@ -51,7 +51,7 @@ const users = {
                     html    : 
                     `Hi there! You have registered your account at telegram app <br>
                     Your username is ${data.username} <br>
-                    Please click this <a href="${URL}users/verify/${hashed}">link</a> to activate your account`
+                    Please click this <a href="${URL}users/activate/${hashed}">link</a> to activate your account`
                 }
 
                 transporter.sendMail(mailOptions, (err, result) => {
@@ -75,7 +75,7 @@ const users = {
             failed(res, [], 'Internal server error')
         }
     },
-    verify: (req,res) => {
+    activate: (req,res) => {
         const token = req.params.token
         if(token) {
             jwt.verify(token, JWT_KEY, (err,decode) => {
@@ -111,16 +111,15 @@ const users = {
             .then(async(result) => {
                 const userData = result[0]
                 const hashWord = userData.password
-                const userRefreshToken = userData.refreshToken
+                const userRefreshToken = userData.refreshtoken
                 const correct = await bcrypt.compare(body.password, hashWord)
 
                 if (correct) {
-                    if(userData.active === 1){
+                    if(userData.active == 1){
                         jwt.sign(
                             { 
                               email : userData.email,
                               username : userData.username,
-                              level: userData.level
                             },
                             JWT_KEY,
                             { expiresIn: 120 },
@@ -131,16 +130,15 @@ const users = {
                                 } else {
                                     if(userRefreshToken === null){
                                         const id = userData.iduser
-                                        const refreshToken = jwt.sign( 
+                                        const refreshtoken = jwt.sign( 
                                             {id} , JWT_KEY)
-                                        usersModel.updateRefreshToken(refreshToken,id)
+                                        usersModel.updateRefreshToken(refreshtoken,id)
                                         .then(() => {
                                             const data = {
                                                 iduser: userData.iduser,
                                                 username: userData.username,
-                                                level: userData.level,
                                                 token: token,
-                                                refreshToken: refreshToken
+                                                refreshtoken: refreshtoken
                                             }
                                             tokenStatus(res, data, 'Login Success')
                                         }).catch((err) => {
@@ -152,7 +150,7 @@ const users = {
                                             username: userData.username,
                                             level: userData.level,
                                             token: token,
-                                            refreshToken: userRefreshToken
+                                            refreshtoken: userRefreshToken
                                         }
                                         tokenStatus(res, data, 'Login Success')
                                     }
@@ -174,8 +172,8 @@ const users = {
         }
     },
     renewToken: (req, res) =>{
-        const refreshToken = req.body.refreshToken
-        usersModel.checkRefreshToken(refreshToken)
+        const refreshtoken = req.body.refreshtoken
+        usersModel.checkRefreshToken(refreshtoken)
         .then((result)=>{
             if(result.length >=1){
                 const user = result[0];
@@ -190,7 +188,7 @@ const users = {
                 )
                 const data = {
                     token: newToken,
-                    refreshToken: refreshToken
+                    refreshtoken: refreshtoken
                 }
                 tokenStatus(res,data, `The token has been refreshed successfully`)
             }else{

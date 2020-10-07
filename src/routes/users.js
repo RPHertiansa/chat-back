@@ -11,7 +11,7 @@ router
     .post('/insert', usersController.insert)
     .patch('/update/:iduser', usersController.update)
     .delete('/delete/:iduser', usersController.delete)
-    .get('/verify/:token', usersController.verify)
+    .get('/activate/:token', usersController.activate)
     .post('/refreshToken', usersController.renewToken)
     .post('/logout/:iduser', usersController.logout)
     .post('/ForgotPassword', usersController.ForgotPassword)

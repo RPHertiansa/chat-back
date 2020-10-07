@@ -6,7 +6,7 @@ const path = require('path')
 const http  = require('http')
 const socketio = require('socket.io')
 const { PORT } = require('./src/helpers/env')
-const userController = require('./src/controllers/users')
+const messageModel = require('./src/models/message')
 const userModel = require('./src/models/users')
 
 const app = express()
@@ -30,15 +30,6 @@ app.use('/api/v1/users', usersRouter)
 io.on('connection', (socket) => {
     console.log('user connected')
 
-    socket.on('sendMessage', (payload) => {
-        const message = `${payload.sender} : ${payload.message}`
-        io.to(payload.receiver).emit('chatList', message)
-    })
-
-    socket.on('join-room', (payload) => {
-        socket.join(payload.user)
-    })
-
     socket.on('get-all-users',()=> {
         userModel.getAll()
         .then((result) => {
@@ -48,6 +39,19 @@ io.on('connection', (socket) => {
             console.log(err)
         })
     })
+
+    socket.on('join-room', (payload) => {
+        socket.join(payload.user)
+    })
+
+    socket.on('sendMessage', (payload) => {
+        const message = `${payload.sender} : ${payload.message}`
+        io.to(payload.receiver).emit('chatList', message)
+    })
+
+    
+
+    
 
     socket.on('notification', (username) => {
         socket.broadcast.emit(('get-notified'), `${username} has joined the conversation`)
