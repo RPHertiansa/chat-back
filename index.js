@@ -1,6 +1,8 @@
 const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
+const ejs = require('ejs')
+const path = require('path')
 const http  = require('http')
 const socketio = require('socket.io')
 const { PORT } = require('./src/helpers/env')
@@ -8,6 +10,9 @@ const userController = require('./src/controllers/users')
 const userModel = require('./src/models/users')
 
 const app = express()
+app.set('views', path.join(__dirname,'src/views'))
+app.set('view engine', 'ejs')
+
 const server = http.createServer(app)
 const io = socketio(server)
 
@@ -15,6 +20,8 @@ const usersRouter = require('./src/routes/users')
 
 app.use(bodyParser.urlencoded({ extended: false}))
 app.use(bodyParser.json())
+
+app.use(express.static('src/uploads'))
 
 app.use(cors())
 

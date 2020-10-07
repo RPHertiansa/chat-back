@@ -6,6 +6,7 @@ module.exports = {
     DB_USER     : process.env.DB_USER,
     DB_NAME     : process.env.DB_NAME,
     JWT_KEY     : process.env.JWT_KEY,
-    email       : process.env.email,
-    password    : process.env.password
+    myemail       : process.env.myemail,
+    mypassword    : process.env.mypassword,
+    URL         : process.env.URL
 }

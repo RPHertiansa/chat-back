@@ -8,5 +8,12 @@ router
     .post('/login', usersController.login)
     .get('/getall', usersController.getAll)
     .get('/getdetail/:iduser', usersController.getDetail)
-
+    .post('/insert', usersController.insert)
+    .patch('/update/:iduser', usersController.update)
+    .delete('/delete/:iduser', usersController.delete)
+    .get('/verify/:token', usersController.verify)
+    .post('/refreshToken', usersController.renewToken)
+    .post('/logout/:iduser', usersController.logout)
+    .post('/ForgotPassword', usersController.ForgotPassword)
+    .post('/newPassword/:userkey', usersController.newPassword)
 module.exports = router;
