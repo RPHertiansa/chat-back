@@ -64,7 +64,7 @@ const users = {
                 })
 
                 res.json({
-                    message: `${data.name} you are registered! Please check your email to activate your account.`
+                    message: `You are registered`
                 })
             })
             .catch((err) => {

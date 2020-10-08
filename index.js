@@ -44,28 +44,20 @@ io.on('connection', (socket) => {
         socket.join(payload)
       })
       socket.on('send-message', (payload) => {
-        const room = payload.room
-        messageModel.insert({
-          sender: payload.username,
-          receiver: room,
-          message: payload.textChat
-        }).then(() => {
-          io.to(room).emit('private-message', {
-            sender: payload.username,
-            msg: payload.textChat,
-            receiver: room
-          })
-        }).catch(err => {
-          console.log(err)
+        const message = `${payload.sender} : ${payload.message}`
+        io.to(payload.receiver).emit('list-messages', {
+          sender: payload.sender,
+          receiver: payload.receiver,
+          message: message
         })
       })
-      socket.on('get-history-message', (payload) => {
-        messageModel.get(payload).then(result => {
-          io.to(payload.sender).emit('history-message', result)
-        }).catch(err => {
-          console.log(err)
-        })
-      })
+      // socket.on('get-history-message', (payload) => {
+      //   messageModel.get(payload).then(result => {
+      //     io.to(payload.sender).emit('history-message', result)
+      //   }).catch(err => {
+      //     console.log(err)
+      //   })
+      // })
 })
 
 
