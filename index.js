@@ -30,6 +30,9 @@ app.use('/api/v1/users', usersRouter)
 io.on('connection', (socket) => {
     console.log('user connected')
 
+    socket.on('join-room', (payload) => {
+        socket.join(payload)
+    })
     socket.on('get-all-users',()=> {
         userModel.getAll()
         .then((result) => {
@@ -39,28 +42,61 @@ io.on('connection', (socket) => {
             console.log(err)
         })
     })
+    // socket.on('get-all-pekerja', (payload) => {
+    //     hireModel.cariPekerja(payload.idperekrut)
+    //     .then((result) => {
+    //         if(result.length === 0) {
+    //             console.log('pekerja not found')
+    //         } else {
+    //             io.emit('listPekerja', result)
+    //         }
+    //     })
+    //     .catch((err) => {
+    //         console.log(err)
+    //     })
+    // })
+    // socket.on('get-all-perekrut', (payload) => {
+    //     hireModel.cariPerekrut(payload.idpekerja)
+    //     .then((result) => {
+    //         if(result.length === 0) {
+    //             console.log('perekrut not found')
+    //         } else {
+    //             io.emit('listPerekrut', result)
+    //         }
+    //     })
+    //     .catch((err) => {
+    //         console.log(err)
+    //     })
+    // })
 
-    socket.on('join-room', (payload) => {
-        socket.join(payload)
-      })
-      socket.on('send-message', (payload) => {
-        const message = `${payload.sender} : ${payload.message}`
-        io.to(payload.receiver).emit('list-messages', {
-          sender: payload.sender,
-          receiver: payload.receiver,
-          message: message
+    socket.on('get-history', (payload) => {
+        console.log(payload)
+        messageModel.getMessages(payload)
+        .then((result) => {
+            io.to(payload.sender).emit('historyMessage', result)
+        }).catch((err)=> {
+            console.log(new Error(err))
         })
-      })
-      // socket.on('get-history-message', (payload) => {
-      //   messageModel.get(payload).then(result => {
-      //     io.to(payload.sender).emit('history-message', result)
-      //   }).catch(err => {
-      //     console.log(err)
-      //   })
-      // })
+    })
+    
+
+    socket.on('send-message', (payload) => {
+        messageModel.sendMessage(payload)
+        .then((result) => {
+            console.log(`${payload.sender} ${payload.receiver} ${payload.message}`)
+            const room = payload.receiver
+            io.to(room).emit('private-message', {
+                sender: payload.sender,
+                msg: payload.message,
+                receiver: room
+            })
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+    })
+    
 })
-
-
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`)
 })
