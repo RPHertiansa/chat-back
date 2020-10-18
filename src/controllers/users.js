@@ -1,11 +1,12 @@
 const usersModel = require('../models/users')
 const { success, failed, tokenStatus } = require('../helpers/response')
+const { JWT_KEY, myemail, mypassword, url, urlforgot } = require('../helpers/env')
+const upload = require('../helpers/uploads')
+const fs = require('fs')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const fs = require('fs')
-const nodemailer = require('nodemailer')
-const { JWT_KEY, myemail, mypassword, URL } = require('../helpers/env')
-const upload = require('../helpers/upload')
+const mailer = require('nodemailer')
+const response = require('../helpers/response')
 
 const users = {
     register: async (req, res) => {
@@ -13,27 +14,25 @@ const users = {
             const body = req.body
 
             const salt = await bcrypt.genSalt(10)
-            const hashword = await bcrypt.hash(body.password, salt)
-
-            const makeUsername = body.name.replace(/[^0-9a-z]/gi, '')
+            const hashWord = await bcrypt.hash(body.password, salt)
+            const username = body.name.replace(/[^0-9a-z]/gi, '')
 
             const data = {
                 name : body.name,
                 email : body.email,
-                username : makeUsername,
-                password : hashword,
-                active : 0,
-                refreshtoken : null,
-                image: '404.png'
+                username : username,
+                password : hashWord,
+                image : 'pp.jpg'
             }
+
             usersModel.register(data)
             .then(() => {
-                const hashed = jwt.sign({
+                const hashWord = jwt.sign({
                     email: data.email,
-                    username: data.username
+                    name: data.name
                 }, JWT_KEY)
 
-                let transporter = nodemailer.createTransport({
+                let transporter = mailer.createTransport({
                     host: 'smtp.gmail.com',
                     port: 587,
                     secure: false,
@@ -45,37 +44,38 @@ const users = {
                 })
 
                 let mailOptions = {
-                    from    : `Telegram ${myemail}`,
-                    to      : data.email,
-                    subject : `Hello ${data.name}`,
-                    html    : 
-                    `Hi there! You have registered your account at telegram app <br>
-                    Your username is ${data.username} <br>
-                    Please click this <a href="${URL}users/activate/${hashed}">link</a> to activate your account`
+                    from: `PEWORLD ${myemail}`,
+                    to: data.email,
+                    subject: `HELLO ${data.name}`,
+                    html:
+                        `Hai <h1><b>${data.name}<b></h1> </br>
+                    PLEASE ACTIVATE YOUR EMAIL ! <br>
+                    and You can Login with your <b>Nama Perekrut : ${data.name}<b> <br>
+                    CLICK --> <a href="${url}users/verify/${hashWord}"> Activation</a>  <---`
                 }
 
                 transporter.sendMail(mailOptions, (err, result) => {
-                    if(err) {
+                    if (err) {
                         res.status(505)
                         failed(res, [], err.message)
                     } else {
-                        success(res, result, 'Activation mail sent')
+                        success(res, [result], `Success Registration, Please activate your email`)
+                        // success(res, [result], `Send Mail Success`)
                     }
                 })
 
                 res.json({
-                    message: `You are registered`
+                    message: `Success Registration, Please activate your email`
                 })
             })
             .catch((err) => {
                 failed(res, [], err.message)
             })
-            
         } catch (error) {
-            failed(res, [], 'Internal server error')
+            failed(res, [], 'Internal server error!')            
         }
     },
-    activate: (req,res) => {
+    verify: (req,res) => {
         const token = req.params.token
         if(token) {
             jwt.verify(token, JWT_KEY, (err,decode) => {
@@ -84,12 +84,12 @@ const users = {
                     failed(res, [], `Failed Activation`)
                 }else{
                     const email = decode.email
-                    usersModel.activateUsers(email)
+                    const name = decode.name
+                    usersModel.activateUser(email)
                     .then((result) => {
                         if(result.affectedRows){
                             res.status(200)
-                            // success(res, {email}, `Congrats Gaes`)
-                            res.render('index', {email})
+                            res.render('perekrut', {email, name})
                         }else{
                             res.status(505)
                             failed(res, [], err.message)
@@ -111,15 +111,15 @@ const users = {
             .then(async(result) => {
                 const userData = result[0]
                 const hashWord = userData.password
-                const userRefreshToken = userData.refreshtoken
+                const userRefreshToken = userData.refreshToken
                 const correct = await bcrypt.compare(body.password, hashWord)
 
                 if (correct) {
-                    if(userData.active == 1){
+                    if(userData.is_active === 1){
                         jwt.sign(
                             { 
-                              email : userData.email,
                               username : userData.username,
+                              name : userData.name,
                             },
                             JWT_KEY,
                             { expiresIn: 120 },
@@ -130,15 +130,17 @@ const users = {
                                 } else {
                                     if(userRefreshToken === null){
                                         const id = userData.iduser
-                                        const refreshtoken = jwt.sign( 
+                                        const refreshToken = jwt.sign( 
                                             {id} , JWT_KEY)
-                                        usersModel.updateRefreshToken(refreshtoken,id)
+                                        usersModel.updateRefreshToken(refreshToken,id)
                                         .then(() => {
                                             const data = {
                                                 iduser: userData.iduser,
+                                                name: userData.name,
                                                 username: userData.username,
+                                                email: userData.email,
                                                 token: token,
-                                                refreshtoken: refreshtoken
+                                                refreshToken: refreshToken
                                             }
                                             tokenStatus(res, data, 'Login Success')
                                         }).catch((err) => {
@@ -147,9 +149,11 @@ const users = {
                                     }else{
                                         const data = {
                                             iduser: userData.iduser,
+                                            name: userData.name,
                                             username: userData.username,
+                                            email: userData.email,
                                             token: token,
-                                            refreshtoken: userRefreshToken
+                                            refreshToken: userRefreshToken
                                         }
                                         tokenStatus(res, data, 'Login Success')
                                     }
@@ -171,22 +175,22 @@ const users = {
         }
     },
     renewToken: (req, res) =>{
-        const refreshtoken = req.body.refreshtoken
-        usersModel.checkRefreshToken(refreshtoken)
+        const refreshToken = req.body.refreshToken
+        usersModel.checkRefreshToken(refreshToken)
         .then((result)=>{
-            if(result.length >=1){
-                const user = result[0];
+            if(result.length >= 1){
+                const userData = result[0];
                 const newToken = jwt.sign(
                     {
-                        email: user.email,
-                        username: user.username
+                        email : userData.email,
+                        name : userData.name 
                     },
                     JWT_KEY,
                     {expiresIn: 3600}
                 )
                 const data = {
                     token: newToken,
-                    refreshtoken: refreshtoken
+                    refreshToken: refreshToken
                 }
                 tokenStatus(res,data, `The token has been refreshed successfully`)
             }else{
@@ -198,8 +202,8 @@ const users = {
     },
     logout: (req,res) => {
         try {
-            const destroy = req.params.iduser
-            usersModel.logout(destroy)
+            const iduser = req.params.iduser
+            usersModel.logout(iduser)
             .then((result) => {
                 success(res,result, `Logout Success`)
             }).catch((err) => {
@@ -213,15 +217,14 @@ const users = {
         try {
             const body = req.body
             const email = body.email
-            usersModel.getEmailUsers(body.email)
-
+            usersModel.getEmail(email)
             .then(() => {
-                const userKey = jwt.sign({
+                const userkey = jwt.sign({
                     email: body.email,
-                    username: body.username
+                    name: body.name
                 }, JWT_KEY)
 
-                usersModel.updateUserKey(userKey,email)
+                usersModel.updateUserKey(userkey, email)
                 .then(async() => {
                     let transporter = mailer.createTransport({
                         host: 'smtp.gmail.com',
@@ -229,19 +232,19 @@ const users = {
                         secure: false,
                         requireTLS: true,
                         auth:{
-                            user: emaill,
-                            pass: passwordd
+                            user: myemail,
+                            pass: mypassword
                         }
                     })
     
                     let mailOptions = {
-                        from    : `ANKASA ${emaill}`,
+                        from    : `PEWORLD ${myemail}`,
                         to      : body.email,
                         subject : `Reset Password ${body.email}`,
                         html:
                         `Hai
                         This is an email to reset the password
-                        KLIK --> <a href="${urlforgot}/forgot?userkey=${userKey}">Klik this link for Reset Password</a>  <---`
+                        KLIK --> <a href="${urlforgot}/resetpass-perekrut?userkey=${userkey}">Klik this link for Reset Password</a>  <---`
                     }
     
                     transporter.sendMail(mailOptions,(err, result) => {
@@ -300,7 +303,7 @@ const users = {
                     }
                 })
             }).catch((err) => {
-                failed(res, [], err)
+                failed(res, [], err.message)
             })        
         } catch (error) {
             failed(res, [], `Internal Server Error`)
@@ -311,27 +314,28 @@ const users = {
             const body = req.params.body
             usersModel.getAll()
             .then((result) => {
-                success(res, result, 'Here are all the users data you requested')
+                success(res, result, 'Here are the perekrut that data you requested')
             })
             .catch((err) => {
-                failed(res, [], err.message)
+                failed(res, [], err)
             })
         } catch (error) {
-            failed(res, [], `Internal server error`)
+            failed(res, [], 'Internal server error!')
         }
     },
     getDetail: (req, res) => {
         try {
             const iduser = req.params.iduser
+            console.log(iduser)
             usersModel.getDetail(iduser)
             .then((result) => {
-                success(res, result, `This is user data with id = ${iduser}`)
+                success(res, result, `Here is the user with id ${iduser}`)
             })
             .catch((err) => {
                 failed(res, [], err.message)
             })
         } catch (error) {
-            failed(res, [], 'Internal server error')
+            failed(res, [], 'Internal server error!')
         }
     },
     insert: (req, res) => {
@@ -367,6 +371,8 @@ const users = {
                         failed(res, [], 'Image size is too big! Please upload another one with size <5mb')
                     } else {
                         failed(res, [], err)
+                        const body = req.body
+                        console.log(body)
                     }
                 } else {
                     const iduser = req.params.iduser
@@ -376,7 +382,7 @@ const users = {
                         const oldImg = result[0].image
                         body.image = !req.file ? oldImg: req.file.filename
                         if (body.image !== oldImg) {
-                            if (oldImg !== '404.png') {
+                            if (oldImg !== 'pp.jpg') {
                                 fs.unlink(`src/uploads/${oldImg}`, (err) => {
                                     if (err) {
                                         failed(res, [], err.message)
@@ -421,7 +427,7 @@ const users = {
             usersModel.getDetail(iduser)
             .then((result) => {
                 const image = result[0].image
-                if(image === '404.png'){
+                if(image === 'pp.jpg'){
                     usersModel.delete(iduser)
                     .then((result) => {
                         success(res, result, `User with id=${iduser} is deleted!`)
@@ -453,5 +459,6 @@ const users = {
         }
     }
 }
+
 
 module.exports = users

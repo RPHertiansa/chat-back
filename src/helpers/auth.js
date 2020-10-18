@@ -13,7 +13,7 @@ const auth = {
     },
     authorize: (req, res, next) => {
         const token = req.headers.token
-        jwt.verify(token, JWT_PRIVATE, (err) => {
+        jwt.verify(token, JWT_KEY, (err) => {
             if (err && err.name === 'TokenExpiredError') {
                 tokenStatus(res, [], 'Token Expired! Please log in again')
             } else if (err && err.name === 'JsonWebTokenError'){

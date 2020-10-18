@@ -1,4 +1,4 @@
-const db = require('../configs/db')
+const db = require('../configs/db');
 
 const users = {
     register: (data) => {
@@ -14,18 +14,7 @@ const users = {
     },
     login: (data) => {
         return new Promise((resolve, reject) => {
-            db.query(`SELECT * FROM users WHERE username = ? `,data.username, (err, result) => {
-                if(err) {
-                    reject(new Error(err))
-                } else {
-                    resolve(result)
-                }
-            })
-        })
-    },
-    logout: (iduser) => {
-        return new Promise((resolve, reject) => {
-            db.query(`UPDATE users SET refreshtoken = null WHERE iduser = '${iduser}'`, (err, result) => {
+            db.query(`SELECT * FROM users WHERE username = '${data.username}'`,  (err, result) => {
                 if (err) {
                     reject (new Error(err))
                 } else {
@@ -34,42 +23,21 @@ const users = {
             })
         })
     },
-    getAll: () => {
-        return new Promise ((resolve, reject) => {
-            db.query(`SELECT * FROM users`, (err, result) => {
-                if(err) {
-                    reject(new Error(err))
-                } else {
-                    resolve(result)
-                }
-            })
-        })
-    },
-    getDetail: (iduser) => {
-        return new Promise((resolve, reject) => {
-            db.query(`SELECT * FROM users WHERE iduser = '${iduser}'`, (err, result) => {
-                if(err) {
-                    reject(new Error(err))
-                } else {
-                    resolve(result)
-                }
-            })
-        })
-    },
-    delete: (iduser) => {
-        return new Promise((resolve, reject) => {
-            db.query(`DELETE FROM users WHERE iduser = '${iduser}'`, (err, result) => {
-                if(err) {
-                    reject(new Error(err))
-                } else {
-                    resolve(result)
-                }
-            })
-        })
-    },
-    updateRefreshToken:(token,id) => {
+    logout:(iduser) => {
         return new Promise((resolve,reject) => {
-            db.query(`UPDATE users SET refreshtoken='${token}' WHERE iduser='${id}'`,
+            db.query(`UPDATE users SET refreshToken = null WHERE iduser='${iduser}'`,
+            (err,result)=> {
+                if (err) {
+                    reject (new Error(err))
+                } else {
+                    resolve(result)
+                }
+            })
+        })
+    }, 
+    updateRefreshToken:(token,iduser) => {
+        return new Promise((resolve,reject) => {
+            db.query(`UPDATE users SET refreshToken='${token}' WHERE iduser='${iduser}'`,
             (err,result) => {
                 if(err) {
                     reject(new Error(err))
@@ -105,7 +73,7 @@ const users = {
     },
     updateUserKey:(userKey,email) => {
         return new Promise((resolve,reject) => {
-            db.query(`UPDATE users SET userKey='${userKey}' WHERE email='${email}'`,
+            db.query(`UPDATE users SET userkey='${userKey}' WHERE email='${email}'`,
             (err,result) => {
                 if(err) {
                     reject(new Error(err))
@@ -115,9 +83,9 @@ const users = {
             })
         })
     },
-    checkRefreshToken: (refrestoken) => {
+    checkRefreshToken: (refreshToken) => {
         return new Promise((resolve,reject)=>{
-            db.query(`SELECT *FROM users WHERE refreshtoken='${refreshtoken}'`, 
+            db.query(`SELECT *FROM users WHERE refreshToken='${refreshToken}'`, 
             (err,result) =>{
                 if(err){
                     reject(new Error(err))
@@ -127,10 +95,21 @@ const users = {
             })
         })  
     },
-    insert: (data) => {
+    getAll: () => {
         return new Promise((resolve, reject) => {
-            db.query(`INSERT INTO users (email, username, password, level, image, address ) VALUES ('${data.email}', '${data.username}', '${data.password}', '${data.level}', '${data.image}', '${data.address}')`, (err, result) => {
-                if(err) {
+            db.query(`SELECT * FROM users`, (err, result) => {
+                if (err) {
+                    reject (new Error(err))
+                } else {
+                    resolve(result)
+                }
+            })
+        })
+    },
+    getDetail: (iduser) => {
+        return new Promise((resolve, reject) => {
+            db.query(`SELECT * FROM users WHERE iduser ='${iduser}'`, (err, result) => {
+                if (err) {
                     reject(new Error(err))
                 } else {
                     resolve(result)
@@ -149,9 +128,20 @@ const users = {
             })
         })
     },
-    activateUsers: (data) => {
+    delete: (iduser) => {
         return new Promise((resolve, reject) => {
-            db.query(`UPDATE users SET active = 1 WHERE email= '${data}'`, (err,result) => {
+            db.query(`DELETE FROM users WHERE iduser = '${iduser}'`, (err, result) => {
+                if (err) {
+                    reject(new Error(err))
+                } else {
+                    resolve(result)
+                }
+            })
+        })
+    },
+    activateUser: (data) => {
+        return new Promise((resolve, reject) => {
+            db.query(`UPDATE users SET is_active = 1 WHERE email = '${data}'`, (err,result) => {
                 if(err){
                     reject(new Error(err))
                 }else{
@@ -160,9 +150,9 @@ const users = {
             })
         })
     },
-    getEmailUsers: (email) => {
+    getEmail: (email) => {
         return new Promise((resolve, reject) => {
-            db.query(`SELECT *FROM users WHERE email='${email}'`, (err, result) => {
+            db.query(`SELECT * FROM users WHERE email ='${email}'`, (err, result) => {
                 if(err){
                     reject(new Error(err))
                 }else{
@@ -175,6 +165,5 @@ const users = {
             })
         })
     }
-}
-
+};
 module.exports = users

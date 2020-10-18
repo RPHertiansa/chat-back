@@ -8,15 +8,28 @@ const socketio = require('socket.io')
 const { PORT } = require('./src/helpers/env')
 const messageModel = require('./src/models/message')
 const userModel = require('./src/models/users')
+const usersRouter = require('./src/routes/users')
+const friendsRouter = require('./src/routes/friends')
+const friendsModel = require('./src/models/friends')
 
 const app = express()
 app.set('views', path.join(__dirname,'src/views'))
 app.set('view engine', 'ejs')
 
+// app.use(express.static(path.join(__dirname, './dist')))
+
+// app.use('*', (req,res) => {
+//     res.sendFile(__dirname, './dist/index.html')
+// })
+
+// app.get('/*', (req,res) => {
+//     res.sendFile(path.join(__dirname, './dist/index.html'))
+// })
+
 const server = http.createServer(app)
 const io = socketio(server)
 
-const usersRouter = require('./src/routes/users')
+
 
 app.use(bodyParser.urlencoded({ extended: false}))
 app.use(bodyParser.json())
@@ -26,6 +39,7 @@ app.use(express.static('src/uploads'))
 app.use(cors())
 
 app.use('/api/v1/users', usersRouter)
+app.use('/api/v1/friends', friendsRouter)
 
 io.on('connection', (socket) => {
     console.log('user connected')
@@ -33,42 +47,15 @@ io.on('connection', (socket) => {
     socket.on('join-room', (payload) => {
         socket.join(payload)
     })
-    socket.on('get-all-users',()=> {
-        userModel.getAll()
+    socket.on('get-all-friends',(payload)=> {
+        friendsModel.findFriends(payload.username)
         .then((result) => {
-            io.emit('userList',result)
+            io.emit('friendList',result)
         })
         .catch((err) => {
             console.log(err)
         })
     })
-    // socket.on('get-all-pekerja', (payload) => {
-    //     hireModel.cariPekerja(payload.idperekrut)
-    //     .then((result) => {
-    //         if(result.length === 0) {
-    //             console.log('pekerja not found')
-    //         } else {
-    //             io.emit('listPekerja', result)
-    //         }
-    //     })
-    //     .catch((err) => {
-    //         console.log(err)
-    //     })
-    // })
-    // socket.on('get-all-perekrut', (payload) => {
-    //     hireModel.cariPerekrut(payload.idpekerja)
-    //     .then((result) => {
-    //         if(result.length === 0) {
-    //             console.log('perekrut not found')
-    //         } else {
-    //             io.emit('listPerekrut', result)
-    //         }
-    //     })
-    //     .catch((err) => {
-    //         console.log(err)
-    //     })
-    // })
-
     socket.on('get-history', (payload) => {
         console.log(payload)
         messageModel.getMessages(payload)

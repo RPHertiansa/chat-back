@@ -27,6 +27,15 @@ const response = {
         }
         res.json(result)
     },
+    notfound: (res, data, message) => {
+      const result = {
+          message,
+          success: false,
+          code: 404,
+          data
+      }
+      res.json(result)
+  },
     tokenExpired: (res,data, message) => {
         const result = {
             message,
@@ -54,6 +63,6 @@ const response = {
         }
         res.json(result)
     }
-};
-
-module.exports = response
+  };
+  
+  module.exports = response
