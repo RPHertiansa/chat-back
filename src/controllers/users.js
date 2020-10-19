@@ -29,7 +29,8 @@ const users = {
             .then(() => {
                 const hashWord = jwt.sign({
                     email: data.email,
-                    name: data.name
+                    name: data.name,
+                    username: data.username
                 }, JWT_KEY)
 
                 let transporter = mailer.createTransport({
@@ -44,14 +45,75 @@ const users = {
                 })
 
                 let mailOptions = {
-                    from: `PEWORLD ${myemail}`,
+                    from: `Telegram ${myemail}`,
                     to: data.email,
                     subject: `HELLO ${data.name}`,
-                    html:
-                        `Hai <h1><b>${data.name}<b></h1> </br>
-                    PLEASE ACTIVATE YOUR EMAIL ! <br>
-                    and You can Login with your <b>Nama Perekrut : ${data.name}<b> <br>
-                    CLICK --> <a href="${url}users/verify/${hashWord}"> Activation</a>  <---`
+                    html:`
+                    <!doctype html>
+                    <html lang="en">
+                    <head>
+                        <!-- Required meta tags -->
+                        <meta charset="utf-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> 
+                        <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400&display=swap');
+                        * {
+                            font-family: 'Rubik', sans-serif;
+                        }
+                        body {
+                            padding: 0;
+                            margin: 0;
+                        }
+                        .footer{
+                        background-color: #7E98DF !important;
+                        color: white;
+                        padding: 25px;
+                        }
+                        .jumbotron {
+                            border-radius: 0% !important;
+                            padding: 25px;
+                            background-color: #E5E5E5;
+                            color: black;
+                        }
+                        .btn {
+                            padding: 5px;
+                            border: 1px solid #7E98DF;
+                            border-radius: 25px;
+                            background-color: #7E98DF;
+                            color: white;
+                            text-align: center;
+                            width: 200px;
+                            margin: 10px auto;
+                        }
+                        .btn:hover{
+                            transform: scale(1.02);
+                        }
+                        </style>
+                        <title>Account Activation</title>
+                    </head>
+                    <body>
+                        <div>
+                            <div class="jumbotron">
+                                <h1>Account Activation</h1>
+                                <p>Hi ${data.name}!</p>
+                                <p>Your account is registered with this data </p>
+                                <p>Email: <span style="text-decoration: none;">${data.email}</span></p>
+                                <p>Username: ${data.username}</p>
+                                <p>Please click this button to activate your account</p>
+                                <button class="btn"><a role="button" href="${url}users/verify/${hashWord}" style="text-decoration: none; color: white;">Activate</a></button>
+                            </div>
+                            <div class="footer">
+                                <img src="http://drive.google.com/uc?export=view&id=1LoR-CMdRYLd_K1hWxZeupB01Htqg1wJO" alt="" style="width: 70px;">
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. <br>In euismod ipsum et dui rhoncus auctor.</p>
+                                <hr style="background-color: white;">
+                                <p>2020 Telegram. All right reserved</p>
+                            </div>
+                        </div
+                        
+                       
+                    </body>
+                    </html>
+                    `
                 }
 
                 transporter.sendMail(mailOptions, (err, result) => {
@@ -89,7 +151,7 @@ const users = {
                     .then((result) => {
                         if(result.affectedRows){
                             res.status(200)
-                            res.render('perekrut', {email, name})
+                            res.render('index', {email, name})
                         }else{
                             res.status(505)
                             failed(res, [], err.message)
@@ -238,7 +300,7 @@ const users = {
                     })
     
                     let mailOptions = {
-                        from    : `PEWORLD ${myemail}`,
+                        from    : `Telegram ${myemail}`,
                         to      : body.email,
                         subject : `Reset Password ${body.email}`,
                         html:
@@ -314,7 +376,7 @@ const users = {
             const body = req.params.body
             usersModel.getAll()
             .then((result) => {
-                success(res, result, 'Here are the perekrut that data you requested')
+                success(res, result, 'Here are the data that you requested')
             })
             .catch((err) => {
                 failed(res, [], err)

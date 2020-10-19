@@ -57,7 +57,6 @@ io.on('connection', (socket) => {
         })
     })
     socket.on('get-history', (payload) => {
-        console.log(payload)
         messageModel.getMessages(payload)
         .then((result) => {
             io.to(payload.sender).emit('historyMessage', result)
@@ -70,7 +69,6 @@ io.on('connection', (socket) => {
     socket.on('send-message', (payload) => {
         messageModel.sendMessage(payload)
         .then((result) => {
-            console.log(`${payload.sender} ${payload.receiver} ${payload.message}`)
             const room = payload.receiver
             io.to(room).emit('private-message', {
                 sender: payload.sender,

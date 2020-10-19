@@ -4,27 +4,60 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <title>Activation Email Success</title>
+    <link rel="icon" href="http://drive.google.com/uc?export=view&id=14rGa57Q6jnswUSL2ZRnk6RO7TzJpLM9D" type="image/x-icon"/>
+    <link rel="shortcut icon" href="http://drive.google.com/uc?export=view&id=14rGa57Q6jnswUSL2ZRnk6RO7TzJpLM9D" type="image/x-icon">
+    
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400&display=swap');
+      * {
+          font-family: 'Rubik', sans-serif;
+      }
+      body {
+          padding: 0;
+          margin: 0;
+      }
+      .footer{
+      background-color: #7E98DF !important;
+      color: white;
+      padding: 25px;
+      }
+      .jumbotron {
+          border-radius: 0% !important;
+          padding: 25px;
+          background-color: #E5E5E5;
+          color: black;
+          height: 370px;
+          text-align: center;
+      }
+      .btn {
+          padding: 5px;
+          border: 1px solid #7E98DF;
+          border-radius: 25px;
+          background-color: #7E98DF;
+          color: white;
+          text-align: center;
+          width: 200px;
+          margin: 10px auto;
+      }
+      .btn:hover{
+          transform: scale(1.02);
+      }
+      </style>
+      <title>Aktivasi Akun</title>
   </head>
   <body>
-    
-    <div class="container-fluid">
-        <div class="jumbotron jumbotron-fluid">
-            <div class="container">
-              <h1 class="display-4">Activation Email Success</h1>
-              <p class="lead"><%= email %></p>
-            </div>
+      <div>
+          <div class="jumbotron">
+            <h1>Your account has been activated</h1>
+            <img src="http://drive.google.com/uc?export=view&id=1jEPW676bPCmzNWFnPHeKn1NJnmiUNTMR" alt=""><br>
+            <button class="btn"><a role="button" href="http://localhost:8080/login" style="text-decoration: none; color: white;">Login</a></button>
+          </div>
+          <div class="footer">
+              <img src="http://drive.google.com/uc?export=view&id=1LoR-CMdRYLd_K1hWxZeupB01Htqg1wJO" alt="" style="width: 70px;">
+              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. <br>In euismod ipsum et dui rhoncus auctor.</p>
+              <hr style="background-color: white;">
+              <p>2020 Telegram. All right reserved</p>
+          </div>
         </div>
-    </div>
-
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
-  </body>
-</html>
+      </body>
+  </html>
