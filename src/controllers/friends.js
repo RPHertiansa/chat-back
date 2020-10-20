@@ -5,8 +5,19 @@ const hire = {
     addFriends: (req, res) => {
         try {
             const body = req.body
+            
             friendsModel.addFriends(body)
             .then((result) => {
+                const data = {
+                    users: body.friend,
+                    friend: body.users
+                }
+                friendsModel.addFriends(data)
+                .then(() => {
+                })
+                .catch((err) => {
+                    console.log(err)
+                })
                 success(res, result, 'Friend is added')
             })
             .catch((err) => {
